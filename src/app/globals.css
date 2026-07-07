@@ -1,26 +1,115 @@
 @import "tailwindcss";
+@import "highlight.js/styles/github-dark.css" layer(base);
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0d0d0d;
+  --surface: #f7f7f8;
+  --surface-hover: #ececee;
+  --border: #e5e5e7;
+  --sidebar-bg: #f7f7f8;
+  --bubble-user: #f0f4ff;
+  --bubble-user-foreground: #0d0d0d;
+  --accent: #3b6dfb;
+  --accent-foreground: #ffffff;
+  --muted: #6b7280;
+  --danger: #dc2626;
+}
+
+.dark {
+  --background: #212121;
+  --foreground: #ececec;
+  --surface: #171717;
+  --surface-hover: #2a2a2a;
+  --border: #2f2f2f;
+  --sidebar-bg: #171717;
+  --bubble-user: #2f2f2f;
+  --bubble-user-foreground: #ececec;
+  --accent: #5b8bff;
+  --accent-foreground: #0d0d0d;
+  --muted: #9b9b9b;
+  --danger: #f87171;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-bubble-user: var(--bubble-user);
+  --color-bubble-user-foreground: var(--bubble-user-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+* {
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+.markdown-body pre {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.markdown-body code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85em;
+}
+
+.markdown-body p {
+  margin: 0.5em 0;
+}
+
+.markdown-body p:first-child {
+  margin-top: 0;
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-body ul {
+  list-style: disc;
+}
+
+.markdown-body ol {
+  list-style: decimal;
+}
+
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border);
+  padding: 0.35em 0.6em;
 }
