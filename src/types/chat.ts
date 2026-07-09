@@ -24,7 +24,16 @@ export interface ModelOption {
   id: string;
   label: string;
   description: string;
+  providerId: string;
   supportsVision?: boolean;
+}
+
+export interface DocumentMeta {
+  id: string;
+  conversationId: string;
+  filename: string;
+  chunkCount: number;
+  createdAt: string;
 }
 
 export interface ApiErrorPayload {
@@ -36,5 +45,6 @@ export interface ApiErrorPayload {
     | "NETWORK_ERROR"
     | "UNSUPPORTED_MODEL"
     | "NOT_FOUND"
+    | "INVALID_FILE_TYPE"
     | "UNKNOWN";
 }

@@ -1,18 +1,21 @@
 import { create } from "zustand";
-import type { ApiErrorPayload, ChatMessage, Conversation, ModelOption } from "@/types/chat";
+import type { ApiErrorPayload, ChatMessage, Conversation, DocumentMeta, ModelOption } from "@/types/chat";
 import {
   ApiRequestError,
   createConversationRequest,
   deleteConversationRequest,
+  deleteDocumentRequest,
   deleteLastUserMessageRequest,
   editLastUserMessageRequest,
   fetchConversation,
   fetchConversations,
   fetchModels,
+  listDocumentsRequest,
   regenerateStream,
   renameConversationRequest,
   sendMessageStream,
   updateConversationModelRequest,
+  uploadDocumentRequest,
 } from "@/lib/api/client";
 import { DEFAULT_MODEL_ID } from "@/lib/ai/models";
 
@@ -27,6 +30,7 @@ interface ChatState {
   status: Status;
   streamingText: string;
   error: ApiErrorPayload | null;
+  documents: DocumentMeta[];
 
   init: () => Promise<void>;
   startNewConversation: () => void;
@@ -40,6 +44,9 @@ interface ChatState {
   editLastUserMessage: (content: string) => Promise<void>;
   deleteLastUserMessage: () => Promise<void>;
   clearError: () => void;
+  loadDocuments: () => Promise<void>;
+  uploadDocument: (file: File) => Promise<void>;
+  deleteDocument: (documentId: string) => Promise<void>;
 }
 
 export function selectActiveModel(state: Pick<ChatState, "conversations" | "activeId" | "pendingModel">): string {
@@ -56,6 +63,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   status: "idle",
   streamingText: "",
   error: null,
+  documents: [],
 
   init: async () => {
     try {
@@ -67,7 +75,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   startNewConversation: () => {
-    set({ activeId: null, messages: [], streamingText: "", error: null });
+    set({ activeId: null, messages: [], streamingText: "", error: null, documents: [] });
   },
 
   selectConversation: async (id) => {
@@ -75,6 +83,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const { conversation } = await fetchConversation(id);
       set({ activeId: id, messages: conversation.messages, status: "idle" });
+      await get().loadDocuments();
     } catch (err) {
       set({ error: toErrorPayload(err), status: "idle" });
     }
@@ -220,6 +229,42 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  loadDocuments: async () => {
+    const { activeId } = get();
+    if (!activeId) {
+      set({ documents: [] });
+      return;
+    }
+    try {
+      const { documents } = await listDocumentsRequest(activeId);
+      set({ documents });
+    } catch (err) {
+      set({ error: toErrorPayload(err) });
+    }
+  },
+
+  uploadDocument: async (file) => {
+    const { activeId } = get();
+    if (!activeId) return;
+    try {
+      const { document } = await uploadDocumentRequest(activeId, file);
+      set((state) => ({ documents: [...state.documents, document] }));
+    } catch (err) {
+      set({ error: toErrorPayload(err) });
+    }
+  },
+
+  deleteDocument: async (documentId) => {
+    const { activeId } = get();
+    if (!activeId) return;
+    try {
+      await deleteDocumentRequest(activeId, documentId);
+      set((state) => ({ documents: state.documents.filter((d) => d.id !== documentId) }));
+    } catch (err) {
+      set({ error: toErrorPayload(err) });
+    }
+  },
 }));
 
 function streamHandlers(set: (partial: Partial<ChatState> | ((state: ChatState) => Partial<ChatState>)) => void, get: () => ChatState) {

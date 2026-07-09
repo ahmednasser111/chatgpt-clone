@@ -1,4 +1,11 @@
-import type { ApiErrorPayload, ChatMessage, Conversation, ConversationWithMessages, ModelOption } from "@/types/chat";
+import type {
+  ApiErrorPayload,
+  ChatMessage,
+  Conversation,
+  ConversationWithMessages,
+  DocumentMeta,
+  ModelOption,
+} from "@/types/chat";
 
 export class ApiRequestError extends Error {
   code: ApiErrorPayload["code"];
@@ -89,6 +96,26 @@ export function editLastUserMessageRequest(conversationId: string, content: stri
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ content }),
   });
+}
+
+export function listDocumentsRequest(conversationId: string): Promise<{ documents: DocumentMeta[] }> {
+  return requestJson(`/api/conversations/${conversationId}/documents`);
+}
+
+export function uploadDocumentRequest(conversationId: string, file: File): Promise<{ document: DocumentMeta }> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return requestJson(`/api/conversations/${conversationId}/documents`, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export async function deleteDocumentRequest(conversationId: string, documentId: string): Promise<void> {
+  const response = await fetch(`/api/conversations/${conversationId}/documents/${documentId}`, { method: "DELETE" });
+  if (!response.ok && response.status !== 204) {
+    await parseJsonOrThrow(response);
+  }
 }
 
 export type SseHandlers = {

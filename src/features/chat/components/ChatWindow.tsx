@@ -8,6 +8,7 @@ import { LoadingIndicator } from "@/components/LoadingIndicator";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { exportConversationAsJson } from "@/lib/export-conversation";
+import { DocumentPanel } from "./DocumentPanel";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { ModelSelector } from "./ModelSelector";
@@ -40,6 +41,7 @@ export function ChatWindow({ onOpenSidebar }: { onOpenSidebar: () => void }) {
             <PanelLeft size={18} />
           </button>
           <ModelSelector disabled={isStreaming} />
+          <DocumentPanel disabled={isStreaming || !activeConversation} />
         </div>
         {activeConversation && (
           <button
